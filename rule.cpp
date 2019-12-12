@@ -79,8 +79,7 @@ int scheduler(int where) {
     map[x][y] = now_player;
     int suc_count = success_count(map, now_player);
     if (suc_count != 0) {
-      cout << "Winner is Player " << now_player << endl;
-      exit(0);
+        return now_player;
     } else {
       if (now_player == 1)
         now_player = 2;
@@ -89,7 +88,7 @@ int scheduler(int where) {
     }
     return 0;
   }
-  return 1;
+  return -1;
 }
 
 void fill_empty(int map[3][3], int player, int ret[3][3]) {
