@@ -63,24 +63,56 @@ int main(void) {
     assert(success_count(buf8, 1) == 6);
     assert(success_count(buf9, 1) == 6);
   }
+  // ai test
+  {
+    int map1[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+    int map2[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+    int map3[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+    int map4[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+    int map5[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+    int map6[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+    int map7[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+    int map8[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+    int map9[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+    auto t = ai(map1, 1, 2);
+    assert(get_best_move(t) == 4);
+    t = ai(map2, 1, 2);
+    assert(get_best_move(t) == 4);
+    t = ai(map3, 1, 2);
+    assert(get_best_move(t) == 4);
+    t = ai(map4, 1, 2);
+    assert(get_best_move(t) == 4);
+    t = ai(map5, 1, 2);
+    assert(get_best_move(t) == 4);
+    t = ai(map6, 1, 2);
+    assert(get_best_move(t) == 4);
+    t = ai(map7, 1, 2);
+    assert(get_best_move(t) == 4);
+    t = ai(map8, 1, 2);
+    assert(get_best_move(t) == 4);
+    t = ai(map9, 1, 2);
+    assert(get_best_move(t) == 4);
+  }
   while (1) {
-    cout << "Player " << now_player << endl;
-    cout << "x: ";
-    int x;
-    cin >> x;
-    cout << "y: ";
-    int y;
-    cin >> y;
-    int where = (x - 1) * 3 + (y - 1);
-    int ret = scheduler(where);
-    if (ret != 0) {
-      cout << "That place is not empty!" << endl;
-    }
-    for (int i = 0; i < 3; ++i) {
-      for (int j = 0; j < 3; ++j) {
-        cout << map[i][j] << " ";
+    if (now_player == 1) {
+      cout << "Player " << now_player << endl;
+      cout << "x: ";
+      int x;
+      cin >> x;
+      cout << "y: ";
+      int y;
+      cin >> y;
+      int where = (x - 1) * 3 + (y - 1);
+      int ret = scheduler(where);
+      if (ret != 0) {
+        cout << "That place is not empty!" << endl;
       }
-      cout << endl;
+    } else {
+      cout << "Player " << now_player << endl;
+      auto t = ai(map, now_player, 2);
+      print_tree(t);
+      scheduler(get_best_move(t));
     }
+    output_map(map);
   }
 }
