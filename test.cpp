@@ -64,6 +64,7 @@ int main(void) {
     assert(success_count(buf9, 1) == 6);
   }
   // ai test
+  /*
   {
     int map1[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
     int map2[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
@@ -93,6 +94,8 @@ int main(void) {
     t = ai(map9, 1, 2);
     assert(get_best_move(t) == 4);
   }
+  */
+  int ret;
   while (1) {
     if (now_player == 1) {
       cout << "Player " << now_player << endl;
@@ -103,16 +106,21 @@ int main(void) {
       int y;
       cin >> y;
       int where = (x - 1) * 3 + (y - 1);
-      int ret = scheduler(where);
-      if (ret != 0) {
-        cout << "That place is not empty!" << endl;
-      }
+      ret = scheduler(where);
     } else {
       cout << "Player " << now_player << endl;
-      auto t = ai(map, now_player, 2);
-      print_tree(t);
-      scheduler(get_best_move(t));
+      auto t = ai(map, now_player, 3);
+      // print_tree(t);
+      ret = scheduler(get_best_move(t));
+    }
+    if (ret < 0) {
+      cout << "That place is not empty!" << endl;
+      continue;
     }
     output_map(map);
+    if (ret != 0) {
+      cout << "Player " << now_player << " won!" << endl;
+      return 0;
+    }
   }
 }
