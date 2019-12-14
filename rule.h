@@ -23,5 +23,8 @@ struct DecisionTree {
   struct DecisionTree *children;
 };
 struct DecisionTree *ai(int grid[3][3], int player, int depth);
-
+int minimax(struct DecisionTree *node, int depth, bool maximizing_player);
+struct DecisionTree *generate_decision_tree(int grid[3][3], int player,
+                                            int depth);
+void set_node_value(struct DecisionTree *node, int player);
 #endif

@@ -18,66 +18,91 @@ int success_count(int grid[3][3], int player) {
   return result;
 }
 
-struct DecisionTree *ai(int grid[3][3], int player, int depth) {
-  if (depth < 0)
+struct DecisionTree *generate_decision_tree(int grid[3][3], int player,
+                                            int depth) {
+  if (depth == 0)
     return nullptr;
-  struct DecisionTree *dt = new struct DecisionTree();
-  dt->children = nullptr;
-  dt->next = nullptr;
+  struct DecisionTree *result = new struct DecisionTree();
+  result->children = nullptr;
+  result->next = nullptr;
   for (int i = 0; i < 3; ++i) {
     for (int j = 0; j < 3; ++j) {
-      dt->grid[i][j] = grid[i][j];
+      result->grid[i][j] = grid[i][j];
     }
   }
-  // {{1, 2, 1}, {0, 1, 0}, {1, 0, 1}}
   for (int i = 0; i < 3; ++i) {
     for (int j = 0; j < 3; ++j) {
-      if (dt->grid[i][j] == 0) {
-        int tmp = dt->grid[i][j];
-        dt->grid[i][j] = player;
+      if (result->grid[i][j] == 0) {
+        result->grid[i][j] = player;
         player = player == 1 ? 2 : 1;
-        struct DecisionTree *new_tree = ai(dt->grid, player, depth - 1);
-        dt->grid[i][j] = tmp;
-        if (new_tree == nullptr) {
-          if (success_count(dt->grid, player) > 0)
-            dt->value = INT_MIN;
-          else {
-            int filled_grid1[3][3];
-            fill_empty(dt->grid, player, filled_grid1);
-            int value = success_count(filled_grid1, player);
-            int filled_grid2[3][3];
-            player = player == 1 ? 2 : 1;
-            if (success_count(dt->grid, player) > 0)
-              dt->value = INT_MAX;
-            else {
-              fill_empty(dt->grid, player, filled_grid2);
-              dt->value = value - success_count(filled_grid2, player);
-            }
-            player = player == 1 ? 2 : 1;
+        if (result->children) {
+          struct DecisionTree *p = result->children;
+          while (p->next) {
+            p = p->next;
           }
-        }
+          p->next = generate_decision_tree(result->grid, player, depth - 1);
+        } else
+          result->children =
+              generate_decision_tree(result->grid, player, depth - 1);
+        result->grid[i][j] = 0;
         player = player == 1 ? 2 : 1;
-        if (dt->children == nullptr)
-          dt->children = new_tree;
-        else {
-          struct DecisionTree *last_ele = dt->children;
-          while (last_ele->next != nullptr)
-            last_ele = last_ele->next;
-          last_ele->next = new_tree;
-        }
       }
     }
   }
-  struct DecisionTree *p = dt->children;
-  int max_value = INT_MIN;
-  while (p) {
-    if (p->value >= max_value) {
-      dt->value = p->value;
-      max_value = p->value;
-    }
-    p = p->next;
+  if (!result->children) {
+    set_node_value(result, player);
   }
-  return dt;
+  return result;
+}
+
+struct DecisionTree *ai(int grid[3][3], int player, int depth) {
+  struct DecisionTree *t = generate_decision_tree(grid, player, depth);
+  minimax(t, depth, true);
+  return t;
+}
+
+void set_node_value(struct DecisionTree *node, int player) {
+  if (node) {
+    int ret1[3][3];
+    int ret2[3][3];
+    int value1, value2;
+    fill_empty(node->grid, player, ret1);
+    value1 = success_count(ret1, player);
+    player = player == 1 ? 2 : 1;
+    fill_empty(node->grid, player, ret2);
+    value2 = success_count(ret2, player);
+    node->value = value1 - value2;
+  }
+}
+
+int minimax(struct DecisionTree *node, int depth, bool maximizing_player) {
+  if (depth == 0 || node->children == nullptr) {
+    return node->value;
+  }
+  int best_value;
+  if (maximizing_player) {
+    best_value = INT_MIN;
+    struct DecisionTree *child = node->children;
+    while (child) {
+      int value = minimax(child, depth - 1, !maximizing_player);
+      child->value = value;
+      if (value >= best_value)
+        best_value = value;
+      child = child->next;
+    }
+    return best_value;
+  } else {
+    best_value = INT_MAX;
+    struct DecisionTree *child = node->children;
+    while (child) {
+      int value = minimax(child, depth - 1, !maximizing_player);
+      child->value = value;
+      if (value <= best_value)
+        best_value = value;
+      child = child->next;
+    }
+  }
+  return best_value;
 }
 
 int scheduler(int where) {
@@ -121,10 +146,10 @@ void clean_tree(struct DecisionTree *t) {
 int get_best_move(struct DecisionTree *t) {
   DecisionTree *child = t->children;
   DecisionTree *max_subtree = nullptr;
-  int min_value = INT_MAX;
+  int max_value = INT_MIN;
   while (child) {
-    if (child->value <= min_value) {
-      min_value = child->value;
+    if (child->value >= max_value) {
+      max_value = child->value;
       max_subtree = child;
     }
     child = child->next;

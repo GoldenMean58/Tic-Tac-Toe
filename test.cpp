@@ -109,7 +109,7 @@ int main(void) {
       ret = scheduler(where);
     } else {
       cout << "Player " << now_player << endl;
-      auto t = ai(map, now_player, 3);
+      auto t = ai(map, now_player, 7);
       // print_tree(t);
       ret = scheduler(get_best_move(t));
     }
