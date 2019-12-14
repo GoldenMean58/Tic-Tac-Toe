@@ -30,17 +30,32 @@ void Widget::paintEvent(QPaintEvent *event) {
     delete p;
 }
 
-void Widget::mousePressEvent(QMouseEvent *event) {
-    if(event->x() > 150 || event->y() > 150)
-        return;
-    int move =  event->x() / 50 + event->y() / 50 * 3;
-    int game_state = scheduler(move);
-    if(game_state == -1) {
-        QMessageBox::information(this, "Failed to move", "That place is not empty!");
-        return;
+int Widget::judge_game_state(int state) {
+    if(state == 0) {
+        bool is_full = true;
+        for(int i = 0; i < 3; ++i) {
+            for(int j =0;j<3;++j){
+                if(map[i][j] == 0) {
+                    is_full = false;
+                }
+            }
+        }
+        if(is_full) {
+            //draw
+            QMessageBox::information(this, "Game over", "Draw!");
+            for(int i = 0; i < 3; ++i) {
+                for(int j =0;j<3;++j){
+                    map[i][j] = 0;
+                }
+            }
+        }
     }
-    if(game_state != 0) {
-        QMessageBox::information(this, "Game over", "Player " + QString::number(game_state) + " won!");
+    if(state == -1) {
+        QMessageBox::information(this, "Failed to move", "That place is not empty!");
+        return -1;
+    }
+    if(state > 0) {
+        QMessageBox::information(this, "Game over", "Player " + QString::number(state) + " won!");
         for(int i = 0; i < 3; ++i) {
             for(int j =0;j<3;++j){
                 map[i][j] = 0;
@@ -48,6 +63,19 @@ void Widget::mousePressEvent(QMouseEvent *event) {
         }
     }
     update();
+    return 0;
+}
+
+void Widget::mousePressEvent(QMouseEvent *event) {
+    if(event->x() > 150 || event->y() > 150)
+        return;
+    int move =  event->x() / 50 + event->y() / 50 * 3;
+    int game_state = scheduler(move);
+    int valid = judge_game_state(game_state);
+    if(valid == 0) {
+        game_state = scheduler(get_best_move(ai(map, 2,7)));
+        judge_game_state(game_state);
+    }
 }
 
 Widget::~Widget()

@@ -19,6 +19,7 @@ public:
     ~Widget();
     void paintEvent(QPaintEvent *event);
     void mousePressEvent(QMouseEvent *event);
+    int judge_game_state(int state);
 private:
     Ui::Widget *ui;
 };
